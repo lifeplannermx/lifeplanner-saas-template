@@ -34,6 +34,21 @@
 - Never hardcode URLs — use env vars (NEXT_PUBLIC_SITE_URL)
 - Run `pnpm validate` before committing
 - After fixing a non-trivial bug, run `/learn-error` to log the lesson
+- Explain what you're doing and why before making changes
+- Never silently skip errors or warnings — always report them
+- When touching auth, API routes, or DB queries, ask user before proceeding
+
+## Available skills
+- `/setup [name]` — initial project setup
+- `/new-feature [name]` — scaffold a new feature
+- `/debug [error]` — structured debugging workflow
+- `/explain [file or concept]` — explain code in simple terms
+- `/code-review` — review recent changes for quality
+- `/security-audit` — full security scan of the codebase
+- `/db-migration [table]` — create Supabase migration + TypeScript types
+- `/learn-error [description]` — log a lesson learned from an error
+- `/validate` — run TypeScript + lint checks
+- `/preflight` — full validation before handoff
 
 ## Env vars (documented in .env.example)
 - NEXT_PUBLIC_SUPABASE_URL — Supabase project URL
