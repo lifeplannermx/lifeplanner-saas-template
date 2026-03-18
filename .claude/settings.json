@@ -1,0 +1,39 @@
+{
+  "permissions": {
+    "allowedTools": [
+      "Read",
+      "Glob",
+      "Grep",
+      "WebSearch",
+      "WebFetch",
+      "TodoWrite",
+      "Agent",
+      "Bash(git status*)",
+      "Bash(git log*)",
+      "Bash(git diff*)",
+      "Bash(git branch*)",
+      "Bash(git show*)",
+      "Bash(pnpm validate*)",
+      "Bash(pnpm lint*)",
+      "Bash(pnpm build*)",
+      "Bash(pnpm dev*)",
+      "Bash(pnpm install*)",
+      "Bash(pnpm run validate*)",
+      "Bash(pnpm run lint*)",
+      "Bash(pnpm run build*)",
+      "Bash(pnpm run preflight*)",
+      "Bash(tsc*)",
+      "Bash(ls*)",
+      "Bash(cat*)",
+      "Bash(head*)",
+      "Bash(tail*)",
+      "Bash(wc*)",
+      "Bash(find*)",
+      "Bash(which*)",
+      "Bash(node -e*)",
+      "Bash(node -v*)",
+      "Bash(pnpm -v*)",
+      "Bash(mkdir*)"
+    ]
+  }
+}

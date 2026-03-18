@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "validate": "tsc --noEmit && eslint",
+    "preflight": "pnpm install && pnpm validate && pnpm build"
   },
   "dependencies": {
     "@supabase/ssr": "^0.9.0",
