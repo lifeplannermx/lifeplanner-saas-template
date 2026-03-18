@@ -1,62 +1,20 @@
-"use client";
+import { createClient } from "@/lib/supabase/server";
+import { redirect } from "next/navigation";
+import LogoutButton from "@/components/logout-button";
 
-import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabase/client";
+export default async function Home() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
 
-type State =
-  | { status: "loading" }
-  | { status: "logged_out" }
-  | { status: "logged_in"; email: string };
-
-export default function Home() {
-  const [state, setState] = useState<State>({ status: "loading" });
-
-  useEffect(() => {
-    const run = async () => {
-      const { data, error } = await supabase.auth.getSession();
-      if (error) {
-        setState({ status: "logged_out" });
-        return;
-      }
-      const email = data.session?.user?.email;
-      setState(email ? { status: "logged_in", email } : { status: "logged_out" });
-    };
-
-    run();
-
-    const { data: sub } = supabase.auth.onAuthStateChange(() => {
-      run();
-    });
-
-    return () => sub.subscription.unsubscribe();
-  }, []);
-
-  const logout = async () => {
-    await supabase.auth.signOut();
-  };
+  if (!user) {
+    redirect("/login");
+  }
 
   return (
-    <main style={{ padding: 24 }}>
-      <h1>Lifeplanner SaaS</h1>
-
-      {state.status === "loading" && <p>Checking session...</p>}
-
-      {state.status === "logged_out" && (
-        <>
-          <p>Not logged in ❌</p>
-          <a href="/login">Go to login</a>
-        </>
-      )}
-
-      {state.status === "logged_in" && (
-        <>
-          <p>Logged in ✅</p>
-          <p>Email: {state.email}</p>
-          <button style={{ marginTop: 12, padding: 10 }} onClick={logout}>
-            Logout
-          </button>
-        </>
-      )}
+    <main className="p-6">
+      <h1 className="text-2xl font-bold mb-4">Dashboard</h1>
+      <p className="mb-2">Logged in as: {user.email}</p>
+      <LogoutButton />
     </main>
   );
 }
