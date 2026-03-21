@@ -1,20 +1,13 @@
-import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import LogoutButton from "@/components/logout-button";
+import { createSupabaseServer } from "@/lib/supabase/server";
 
 export default async function Home() {
-  const supabase = await createClient();
+  const supabase = await createSupabaseServer();
   const { data: { user } } = await supabase.auth.getUser();
 
-  if (!user) {
+  if (user) {
+    redirect("/dashboard");
+  } else {
     redirect("/login");
   }
-
-  return (
-    <main className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Dashboard</h1>
-      <p className="mb-2">Logged in as: {user.email}</p>
-      <LogoutButton />
-    </main>
-  );
 }

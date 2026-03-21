@@ -1,146 +1,119 @@
-# SaaS Template
+# LifePlanner SaaS Template
 
-Reusable template for building SaaS applications with Claude Code. Includes authentication, route protection, and a complete Claude Code intelligence system with skills, rules, hooks, and subagents.
+Template base para proyectos SaaS con Next.js + Supabase. Incluye autenticación, middleware de protección, timezone de México, error boundaries, y configuración de calidad lista para producción.
 
 ## Stack
 
-- **Next.js 16** (App Router) + **React 19**
-- **TypeScript 5** (strict mode)
+- **Next.js 16** (App Router) + **React 19** + **TypeScript 5** (strict)
 - **Tailwind CSS 4**
-- **Supabase** (auth via `@supabase/ssr`, database, storage)
-- **Vercel** deployment
-- **pnpm** package manager
+- **Supabase** (Auth via @supabase/ssr + PostgreSQL)
+- **Playwright** (tests e2e)
 
-## Quick start
+## Inicio rápido
 
 ```bash
-# 1. Install dependencies
+# 1. Instalar dependencias
 pnpm install
 
-# 2. Create environment file
+# 2. Configurar variables de entorno
 cp .env.example .env.local
-# Fill in your Supabase credentials and site URL
+# Llenar NEXT_PUBLIC_SUPABASE_URL y NEXT_PUBLIC_SUPABASE_ANON_KEY
 
-# 3. Configure Supabase Auth (in Supabase dashboard)
-# Site URL: http://localhost:3000
-# Redirect URL: http://localhost:3000/auth/callback
+# 3. Configurar Supabase Auth (en el dashboard de Supabase)
+#   Site URL: http://localhost:3000
+#   Redirect URL: http://localhost:3000/auth/callback
 
-# 4. Run dev server
+# 4. Iniciar servidor
 pnpm dev
-
-# 5. Validate the project compiles
-pnpm validate
 ```
 
-## Scripts
+## Qué incluye
 
-| Command | Description |
-|---------|-------------|
-| `pnpm dev` | Start development server |
-| `pnpm build` | Production build |
-| `pnpm lint` | Run ESLint |
-| `pnpm validate` | TypeScript check + lint |
-| `pnpm preflight` | Full validation (install + validate + build) |
+### Autenticación
+- Login con contraseña y magic link (`/login`)
+- Auth callback con `@supabase/ssr` (`/auth/callback`)
+- Middleware de protección para rutas `/dashboard/*`
+- Redirección automática de usuarios no autenticados
 
-## Project structure
+### Supabase (configuración correcta)
+- `lib/supabase/server.ts` — cliente para server components (usa cookies)
+- `lib/supabase/browser.ts` — cliente para client components
+- Middleware con refresh de sesión automático
+
+### Timezone (America/Mexico_City)
+- `lib/dates.ts` con utilidades: `getTodayMX()`, `formatDateMX()`, `getCurrentHourMX()`, `getDateRangeMX()`, `localMXToUTC()`
+- Todos los cálculos de fecha usan zona horaria de México
+
+### Seguridad
+- Security headers: X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy
+- Middleware de auth que protege rutas automáticamente
+- No hardcodea URLs (usa NEXT_PUBLIC_SITE_URL)
+
+### Error handling
+- `global-error.tsx` — error boundary global
+- `error.tsx` — error boundary de la app
+- `not-found.tsx` — página 404 personalizada
+- `loading.tsx` — loading state global
+
+### Testing
+- Playwright configurado con Desktop Chrome + Mobile Chrome
+- Configuración lista para agregar tests e2e
+
+## Comandos
+
+```bash
+pnpm dev        # Servidor de desarrollo
+pnpm build      # Build de producción
+pnpm start      # Servidor de producción
+pnpm lint       # ESLint
+pnpm validate   # TypeScript + lint
+pnpm preflight  # Validación completa (install + validate + build)
+pnpm test       # Tests e2e (Playwright)
+pnpm test:ui    # Tests en modo visual
+```
+
+## Estructura
 
 ```
 app/
-├── layout.tsx                 # Root layout (fonts, Tailwind)
-├── page.tsx                   # Home (server component, auth-gated)
-├── login/page.tsx             # Login page (magic link)
-├── auth/callback/route.ts     # OAuth callback handler
-├── (protected)/               # Authenticated routes (add pages here)
-└── (public)/                  # Public routes (add pages here)
-
-components/
-└── logout-button.tsx          # Client component example
-
-lib/supabase/
-├── client.ts                  # Browser client (use in "use client" components)
-├── server.ts                  # Server client (use in server components + API routes)
-└── middleware.ts               # Session refresh logic for middleware
-
-types/
-└── index.ts                   # Shared TypeScript interfaces
-
-middleware.ts                  # Route protection + session refresh
+├── global-error.tsx      # Error boundary global
+├── error.tsx             # Error boundary de la app
+├── not-found.tsx         # Página 404
+├── loading.tsx           # Loading state global
+├── layout.tsx            # Root layout
+├── page.tsx              # Home page
+├── login/page.tsx        # Login (contraseña + magic link)
+└── auth/callback/route.ts # Callback de Supabase Auth
+lib/
+├── dates.ts              # Utilidades de timezone (America/Mexico_City)
+└── supabase/
+    ├── server.ts         # Cliente para server components (@supabase/ssr)
+    └── browser.ts        # Cliente para client components (@supabase/ssr)
+middleware.ts             # Auth guard + session refresh
+tests/                    # Tests e2e (Playwright)
+playwright.config.ts      # Configuración de Playwright
 ```
 
-## What's included
+## Variables de entorno
 
-### Authentication
-- Magic link login via Supabase
-- Server-side auth with `@supabase/ssr` (not the basic JS client)
-- `getUser()` for auth verification (not `getSession()`)
-- Middleware for automatic session refresh and route protection
-- Configurable redirect URL via `NEXT_PUBLIC_SITE_URL`
+| Variable | Descripción | Requerida |
+|----------|-------------|-----------|
+| `NEXT_PUBLIC_SUPABASE_URL` | URL del proyecto Supabase | Si |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Llave pública de Supabase | Si |
+| `NEXT_PUBLIC_SITE_URL` | URL de la app (para redirects) | Si |
+| `E2E_USER_EMAIL` | Email para tests e2e | Solo tests |
+| `E2E_USER_PASSWORD` | Contraseña para tests e2e | Solo tests |
 
-### Claude Code intelligence system
+## Quality gates
 
-The template includes a complete `.claude/` directory that makes Claude Code follow best practices automatically.
+Antes de cada push, verificar:
+1. `pnpm validate` pasa
+2. `pnpm build` exitoso
+3. `pnpm test` verde (si hay tests)
+4. Error boundaries y loading states presentes
+5. Sin `console.log` en código de producción
+6. Sin URLs hardcodeadas
 
-**Rules** (auto-loaded every session):
+## Deploy
 
-| Rule | What it enforces |
-|------|-----------------|
-| `code-style.md` | TypeScript/React conventions, no `any` types |
-| `nextjs.md` | App Router patterns, server vs client components |
-| `supabase.md` | Always use wrappers, `getUser()` not `getSession()`, RLS |
-| `components.md` | Tailwind usage, form patterns, data fetching |
-| `security.md` | Auth checks, input validation, secrets management |
-| `quality-gates.md` | Required: auth, error handling, loading states, types |
-| `workflow.md` | Explain before acting, never skip errors, validate after changes |
-| `errors.md` | Lessons learned (grows over time via `/learn-error`) |
-
-**Skills** (invoke with `/command`):
-
-| Skill | Description |
-|-------|-------------|
-| `/setup [name]` | Initial project setup after cloning |
-| `/new-feature [name]` | Scaffold a feature following conventions |
-| `/debug [error]` | Structured debugging with root cause analysis |
-| `/explain [file]` | Explain code in simple terms, no jargon |
-| `/code-review` | Quality review of recent changes |
-| `/security-audit` | Full security scan of the codebase |
-| `/db-migration [table]` | Create Supabase migration + TypeScript types |
-| `/learn-error [desc]` | Log a lesson learned so it's never repeated |
-| `/validate` | Run TypeScript + lint checks |
-| `/preflight` | Full validation before handoff |
-
-**Subagents** (auto-delegated or invoked with `@name`):
-
-| Agent | Model | Role |
-|-------|-------|------|
-| `code-reviewer` | Sonnet | Read-only code quality review |
-| `security-scanner` | Sonnet | Security analysis on auth/API/DB code |
-
-**Hooks** (run automatically):
-
-| Hook | Trigger | Action |
-|------|---------|--------|
-| Auto-validate | After every `.ts`/`.tsx` edit | Runs `tsc --noEmit` |
-| Protect secrets | Before any file edit | Blocks edits to `.env*` and secrets files |
-
-**Permissions** (auto-approved, no prompts):
-
-All read-only operations (Read, Glob, Grep, search), git read commands, validation scripts, and `ls`/`find`/`mkdir` are pre-approved. Edits to code still require user approval.
-
-## Environment variables
-
-Documented in `.env.example`:
-
-| Variable | Description |
-|----------|-------------|
-| `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anonymous/public key |
-| `NEXT_PUBLIC_SITE_URL` | App URL (`http://localhost:3000` in dev) |
-
-## How to use this template
-
-1. Clone or fork this repo
-2. Run `/setup [your-project-name]` in Claude Code
-3. Define your product in the `<!-- CUSTOMIZE -->` section of `CLAUDE.md`
-4. Use `/new-feature` and `/db-migration` to build features
-5. Use `/code-review` and `/security-audit` before delivering
-6. Use `/preflight` for final validation
+Configurado para **Vercel**. Push a `main` dispara deploy automático.
